@@ -34,6 +34,56 @@ npm run dev
 
 Your application will be available at `http://localhost:5173`.
 
+## Environment Variables
+
+This application uses environment variables for configuration. Copy `.env.example` to `.env` and update the values as needed:
+
+```bash
+cp .env.example .env
+```
+
+### Available Environment Variables
+
+| Variable                      | Description                         | Default                     |
+| ----------------------------- | ----------------------------------- | --------------------------- |
+| `VITE_API_BASE_URL`           | Base URL for API calls              | `http://localhost:3001/api` |
+| `VITE_API_TIMEOUT`            | API request timeout in milliseconds | `10000`                     |
+| `VITE_MAP_DEFAULT_CENTER_LAT` | Default map center latitude         | `39.8283`                   |
+| `VITE_MAP_DEFAULT_CENTER_LNG` | Default map center longitude        | `-98.5795`                  |
+| `VITE_MAP_DEFAULT_ZOOM`       | Default map zoom level              | `4`                         |
+| `VITE_MAP_MAX_ZOOM`           | Maximum map zoom level              | `18`                        |
+| `VITE_MAP_MIN_ZOOM`           | Minimum map zoom level              | `1`                         |
+| `VITE_ENABLE_DEBUG_MODE`      | Enable debug logging                | `false`                     |
+| `VITE_ENABLE_ANALYTICS`       | Enable analytics tracking           | `true`                      |
+| `VITE_ENABLE_NOTIFICATIONS`   | Enable notification system          | `true`                      |
+| `VITE_GOOGLE_MAPS_API_KEY`    | Google Maps API key                 | -                           |
+| `VITE_OPENWEATHER_API_KEY`    | OpenWeather API key                 | -                           |
+| `VITE_APP_NAME`               | Application name                    | `Map Visual`                |
+| `VITE_APP_VERSION`            | Application version                 | `1.0.0`                     |
+| `VITE_APP_ENVIRONMENT`        | Application environment             | `development`               |
+
+### Using Environment Variables in Components
+
+```tsx
+import { useEnvironment, useApiConfig, useMapConfig } from '~/lib/env-provider';
+
+function MyComponent() {
+  // Access all environment variables
+  const env = useEnvironment();
+
+  // Access specific configurations
+  const apiConfig = useApiConfig();
+  const mapConfig = useMapConfig();
+
+  return (
+    <div>
+      <p>API Base URL: {apiConfig.baseUrl}</p>
+      <p>Map Center: {mapConfig.defaultCenter.join(', ')}</p>
+    </div>
+  );
+}
+```
+
 ## Building for Production
 
 Create a production build:

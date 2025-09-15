@@ -1,13 +1,19 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { Suspense, lazy } from 'react';
+import { ThemeToggle } from '~/components/ui/theme-toggle';
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
-}
+const MapView = lazy(() => import('~/map-view/MapView'));
 
 export default function Home() {
-  return <Welcome />;
+  return (
+    <div className="relative h-screen">
+      <Suspense fallback={<div>Loading map...</div>}>
+        <MapView />
+      </Suspense>
+
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+    </div>
+  );
 }
