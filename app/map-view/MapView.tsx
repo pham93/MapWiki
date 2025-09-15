@@ -4,11 +4,15 @@ import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
 import VectorSource from 'ol/source/Vector';
 import { Style } from 'ol/style';
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '~/components/ui/button';
-import { ZoomIn, ZoomOut } from 'lucide-react';
+import { Input } from '~/components/ui/input';
+import { ZoomIn, ZoomOut, Search } from 'lucide-react';
 import { useExternalServices } from '~/lib/env-provider';
 import { apply } from 'ol-mapbox-style';
+
+import { usePlacesAutocomplete } from '~/lib/use-places-autocomplete';
+import { useMapNavigation } from '~/lib/use-map-navigation';
 
 export type LayerType = 'osm';
 export type VectorLayerType = 'none' | 'countries' | 'states' | 'counties';
@@ -37,7 +41,18 @@ export const layerOptions: LayerOption[] = [
 const MapView = () => {
   const mapInstance = useRef<Map | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const autocompleteRef = useRef<HTMLInputElement>(null);
   const { googleMapsApiKey } = useExternalServices();
+
+  // Use custom hooks for search functionality
+  const {
+    searchQuery,
+    suggestions,
+    showSuggestions,
+    handleSearchChange,
+    clearSearch,
+  } = usePlacesAutocomplete();
+  const { navigateToPlace } = useMapNavigation(mapInstance.current);
 
   // Create map and base layer
   useEffect(() => {
@@ -76,40 +91,6 @@ const MapView = () => {
     };
   }, [googleMapsApiKey]);
 
-  // Manage vector layer
-  // useEffect(() => {
-  //   if (!mapInstance.current) return;
-
-  //   const map = mapInstance.current;
-
-  //   // Remove existing vector layer
-  //   if (vectorLayerRef.current) {
-  //     map.removeLayer(vectorLayerRef.current);
-  //     vectorLayerRef.current = null;
-  //   }
-
-  //   // Add new vector layer if selected
-  //   if (selectedVectorLayer !== 'none') {
-  //     const vectorLayerOption = vectorLayerOptions.find(
-  //       (layer) => layer.id === selectedVectorLayer
-  //     );
-  //     if (
-  //       vectorLayerOption &&
-  //       vectorLayerOption.source &&
-  //       vectorLayerOption.style
-  //     ) {
-  //       const vectorLayer = new VectorLayer({
-  //         source: vectorLayerOption.source,
-  //         style: vectorLayerOption.style,
-  //       });
-  //       map.addLayer(vectorLayer);
-  //       vectorLayerRef.current = vectorLayer;
-  //     }
-  //   }
-  // }, [selectedVectorLayer]);
-
-  // Add zoom change listener for automatic layer switching
-
   const handleZoomIn = () => {
     if (mapInstance.current) {
       const view = mapInstance.current.getView();
@@ -130,29 +111,70 @@ const MapView = () => {
     }
   };
 
+  // Handle place selection with navigation
+  const handlePlaceSelect = (placeId: string) => {
+    navigateToPlace(placeId);
+    clearSearch();
+  };
+
   return (
     <div className="relative w-full h-full">
       <div ref={mapRef} id="map" className="w-full h-full"></div>
 
-      {/* Custom Zoom Controls */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-1">
-        <Button
-          size="icon"
-          onClick={handleZoomIn}
-          className="h-10 w-10"
-          aria-label="Zoom in"
-        >
-          <ZoomIn className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleZoomOut}
-          className="h-10 w-10"
-          aria-label="Zoom out"
-        >
-          <ZoomOut className="h-4 w-4" />
-        </Button>
+      {/* Custom Controls */}
+      <div className="absolute top-4 left-4 z-10 flex gap-2">
+        {/* Zoom Controls */}
+        <div className="flex flex-col gap-1">
+          <Button
+            size="icon"
+            onClick={handleZoomIn}
+            className="h-10 w-10"
+            aria-label="Zoom in"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleZoomOut}
+            className="h-10 w-10"
+            aria-label="Zoom out"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Search Input */}
+        <div className="relative">
+          <div className="relative flex items-center">
+            <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              ref={autocompleteRef}
+              type="text"
+              placeholder="Search places..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="w-64 pl-10 pr-4 h-10"
+            />
+          </div>
+
+          {/* Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-20 max-h-60 overflow-y-auto">
+              {suggestions.map((suggestion) => (
+                <button
+                  key={suggestion.placePrediction.placeId}
+                  onClick={() =>
+                    handlePlaceSelect(suggestion.placePrediction.placeId)
+                  }
+                  className="w-full text-left px-4 py-2 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+                >
+                  {suggestion.placePrediction.text.text}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
