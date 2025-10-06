@@ -1,11 +1,16 @@
-import { create } from 'zustand';
+import { create, type StoreApi } from 'zustand';
 import { createContext, useContext, type ReactNode } from 'react';
+import type { Notification } from './use-notification';
+import type { Feature } from 'ol';
+import { BoundaryLevel } from '~/map-view/map-utils';
 
 // Define the global state interface
 export interface GlobalState {
   // UI states
   sidebarOpen: boolean;
+  detailDrawerOpen: boolean;
   theme: 'light' | 'dark' | 'system';
+  currentBoundary: BoundaryLevel;
   loading: boolean;
 
   // Application states
@@ -19,26 +24,18 @@ export interface GlobalState {
     showControls: boolean;
   };
 
-  // Any other global state
-  [key: string]: unknown;
-}
-
-export interface Notification {
-  id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
-  message: string;
-  timestamp: number;
-  autoHide?: boolean;
-  duration?: number;
+  selectedFeature?: Feature | null;
 }
 
 // Initial state
 const initialState: GlobalState = {
   sidebarOpen: false,
+  detailDrawerOpen: false,
   theme: 'system',
   loading: false,
   error: null,
   notifications: [],
+  currentBoundary: BoundaryLevel.COUNTRY,
   mapSettings: {
     center: [0, 0],
     zoom: 2,
@@ -60,10 +57,10 @@ interface GlobalStore extends GlobalState {
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
   updateMapSettings: (settings: Partial<GlobalState['mapSettings']>) => void;
-  setGlobalValue: (key: string, value: unknown) => void;
+  setGlobalStates: StoreApi<GlobalState>['setState'];
 }
 
-export const useGlobalStore = create<GlobalStore>((set) => ({
+const useGlobalStore = create<GlobalStore>((set) => ({
   ...initialState,
 
   setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
@@ -103,9 +100,7 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
     }));
   },
 
-  setGlobalValue: (key: string, value: unknown) => {
-    set({ [key]: value });
-  },
+  setGlobalStates: set,
 }));
 
 // Create context for React integration
@@ -169,27 +164,6 @@ export function useError() {
   };
 }
 
-export function useNotifications() {
-  const {
-    notifications,
-    addNotification,
-    removeNotification,
-    clearNotifications,
-  } = useGlobalStore();
-  return {
-    notifications,
-    addNotification,
-    removeNotification,
-    clearNotifications,
-    addSuccess: (message: string) =>
-      addNotification({ type: 'success', message }),
-    addError: (message: string) => addNotification({ type: 'error', message }),
-    addWarning: (message: string) =>
-      addNotification({ type: 'warning', message }),
-    addInfo: (message: string) => addNotification({ type: 'info', message }),
-  };
-}
-
 export function useMapSettings() {
   const { mapSettings, updateMapSettings } = useGlobalStore();
   return {
@@ -200,19 +174,4 @@ export function useMapSettings() {
     setShowControls: (showControls: boolean) =>
       updateMapSettings({ showControls }),
   };
-}
-
-// Generic hook for custom global state
-export function useGlobalValue<T>(
-  key: string,
-  defaultValue?: T
-): [T, (value: T) => void] {
-  const store = useGlobalStore();
-  const value = (store[key] !== undefined ? store[key] : defaultValue) as T;
-
-  const setValue = (newValue: T) => {
-    store.setGlobalValue(key, newValue);
-  };
-
-  return [value, setValue];
 }

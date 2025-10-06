@@ -1,7 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { ThemeToggle } from '~/components/ui/theme-toggle';
 
-const MapView = lazy(() => import('~/map-view/MapView'));
+const MapView = lazy(() => import('~/map-view/map-view'));
 
 export default function Home() {
   return (

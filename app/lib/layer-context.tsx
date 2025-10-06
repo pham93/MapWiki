@@ -1,11 +1,8 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
-import type { LayerType, VectorLayerType } from '~/map-view/MapView';
 
 interface LayerContextType {
   baseLayer: string;
   setBaseLayer: (layer: string) => void;
-  selectedVectorLayer: VectorLayerType;
-  setSelectedVectorLayer: (layer: VectorLayerType) => void;
   vectorOpacity: number;
   setVectorOpacity: (opacity: number) => void;
 }
@@ -14,14 +11,10 @@ const LayerContext = createContext<LayerContextType | undefined>(undefined);
 
 export function LayerProvider({
   children,
-  selectedVectorLayer,
-  setSelectedVectorLayer,
   vectorOpacity,
   setVectorOpacity,
 }: {
   children: ReactNode;
-  selectedVectorLayer: VectorLayerType;
-  setSelectedVectorLayer: (layer: VectorLayerType) => void;
   vectorOpacity: number;
   setVectorOpacity: (opacity: number) => void;
 }) {
@@ -31,8 +24,6 @@ export function LayerProvider({
       value={{
         baseLayer,
         setBaseLayer,
-        selectedVectorLayer,
-        setSelectedVectorLayer,
         vectorOpacity,
         setVectorOpacity,
       }}

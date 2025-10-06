@@ -33,7 +33,7 @@
       "id": "background",
       "type": "background",
       "layout": { "visibility": "visible" },
-      "paint": { "background-color": "rgba(150, 150, 187, 1)" }
+      "paint": { "background-color": "rgba(11, 11, 27, 1)" }
     },
     {
       "id": "park",
@@ -55,7 +55,11 @@
         ["!=", "brunnel", "tunnel"]
       ],
       "layout": { "visibility": "visible" },
-      "paint": { "fill-antialias": true, "fill-color": "rgba(16, 16, 22, 1)" }
+      "paint": {
+        "fill-antialias": true,
+        "fill-color": "rgba(12, 9, 37, 1)",
+        "fill-outline-color": "rgba(152, 128, 227, 1)"
+      }
     },
     {
       "id": "landcover_ice_shelf",
@@ -861,7 +865,7 @@
       "layout": {
         "line-cap": "round",
         "line-join": "round",
-        "visibility": "visible"
+        "visibility": "none"
       },
       "paint": {
         "line-blur": 0.4,
@@ -886,7 +890,11 @@
       "minzoom": 2,
       "maxzoom": 23,
       "filter": ["all", ["==", "admin_level", 2], ["!has", "claimed_by"]],
-      "layout": { "line-cap": "round", "line-join": "round" },
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round",
+        "visibility": "visible"
+      },
       "paint": {
         "line-blur": {
           "base": 1,
@@ -895,7 +903,7 @@
             [22, 4]
           ]
         },
-        "line-color": "rgba(0, 0, 0, 0.68)",
+        "line-color": "rgba(0, 0, 0, 0.54)",
         "line-opacity": 1,
         "line-width": {
           "base": 1.1,
@@ -917,7 +925,7 @@
       "layout": {
         "line-cap": "round",
         "line-join": "round",
-        "visibility": "none"
+        "visibility": "visible"
       },
       "paint": {
         "line-blur": {
@@ -927,7 +935,7 @@
             [22, 4]
           ]
         },
-        "line-color": "rgba(206, 212, 206, 1)",
+        "line-color": "rgba(0, 0, 0, 1)",
         "line-opacity": 1,
         "line-width": {
           "base": 1.1,
@@ -965,12 +973,12 @@
         "text-offset": [0.5, 0],
         "text-size": 10,
         "text-transform": "uppercase",
-        "visibility": "none"
+        "visibility": "visible"
       },
       "paint": {
-        "text-color": "rgb(117, 129, 145)",
+        "text-color": "rgba(255, 255, 255, 1)",
         "text-halo-blur": 1,
-        "text-halo-color": "rgb(242,243,240)",
+        "text-halo-color": "rgba(0, 0, 0, 0)",
         "text-halo-width": 1
       }
     },

@@ -14,9 +14,9 @@ import { LayerProvider } from '~/lib/layer-context';
 import { GlobalStateProvider } from '~/lib/global-state';
 import { EnvironmentProvider } from '~/lib/env-provider';
 import { Sidebar } from '~/components/ui/sidebar';
-import type { LayerType, VectorLayerType } from '~/map-view/MapView';
 import type { Route } from './+types/root';
 import './app.css';
+import { DetailDrawer } from './components/ui/detail-drawer';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -50,21 +50,17 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  const [selectedVectorLayer, setSelectedVectorLayer] =
-    useState<VectorLayerType>('none');
   const [vectorOpacity, setVectorOpacity] = useState(0.7);
-
   return (
     <EnvironmentProvider>
       <GlobalStateProvider>
         <ThemeProvider defaultTheme="system" storageKey="map-visual-ui-theme">
           <LayerProvider
-            selectedVectorLayer={selectedVectorLayer}
-            setSelectedVectorLayer={setSelectedVectorLayer}
             vectorOpacity={vectorOpacity}
             setVectorOpacity={setVectorOpacity}
           >
             <Sidebar />
+            <DetailDrawer />
             <Outlet />
           </LayerProvider>
         </ThemeProvider>
