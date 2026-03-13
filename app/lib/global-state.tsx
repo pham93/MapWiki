@@ -8,6 +8,7 @@ import { BoundaryLevel } from '~/map-view/map-utils';
 export interface GlobalState {
   // UI states
   sidebarOpen: boolean;
+  imagePreview: boolean;
   detailDrawerOpen: boolean;
   theme: 'light' | 'dark' | 'system';
   currentBoundary: BoundaryLevel;
@@ -32,6 +33,7 @@ const initialState: GlobalState = {
   sidebarOpen: false,
   detailDrawerOpen: false,
   theme: 'system',
+  imagePreview: false,
   loading: false,
   error: null,
   notifications: [],

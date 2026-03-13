@@ -4,12 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useGlobalState } from './global-state';
 import { unByKey } from 'ol/Observable';
 import type { FeatureLike } from 'ol/Feature';
-import { getBoundaryLevel, getZoom } from '~/map-view/map-utils';
+import { getBoundaryLevel } from '~/map-view/map-utils';
+import { getCenter } from 'ol/extent';
 
 export const useInteractiveMap = (map: Map | null) => {
   const { setGlobalStates } = useGlobalState();
   const prevSelected = useRef<FeatureLike | null>(null);
-  const [hoverSelection, setHoverSelection] = useState<string | undefined>('');
+  const [hoverSelection, setHoverSelection] = useState<FeatureLike | null>(
+    null
+  );
 
   const handleZoomIn = () => {
     if (map) {
@@ -51,7 +54,7 @@ export const useInteractiveMap = (map: Map | null) => {
     // Popup overlay
     const overlay = new Overlay({
       element: document.getElementById('detail-popover')!,
-      autoPan: { animation: { duration: 250 } },
+      autoPan: false,
     });
 
     const handleSelections = (event: MapBrowserEvent) => {
@@ -78,25 +81,29 @@ export const useInteractiveMap = (map: Map | null) => {
       }
 
       if (prevSelected.current !== selected) {
-        if (selected) {
-          setHoverSelection(selected.get('code').toString());
-          if (overlay.getElement()) {
-            overlay.getElement()!.innerHTML = `<>${selected.getProperties().name}</h1>`;
-          }
-        } else {
-          setHoverSelection('');
-        }
-
+        setHoverSelection(selected);
         prevSelected.current = selected;
       }
     };
 
     map.addOverlay(overlay);
+
     const onHoverEvent = map.on('pointermove', handleSelections);
+
     const onClickEvent = map.on('click', () => {
       setGlobalStates({
         detailDrawerOpen: true,
         selectedFeature: prevSelected.current as Feature<Geometry>,
+      });
+      const geo = prevSelected.current?.getGeometry();
+      if (!geo) {
+        return;
+      }
+      const [x, y] = getCenter(geo.getExtent());
+      const deltaX = 200 * (map.getView().getResolution() ?? 0);
+      map.getView().animate({
+        center: [x + deltaX, y],
+        duration: 500,
       });
     });
 

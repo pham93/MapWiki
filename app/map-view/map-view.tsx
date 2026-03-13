@@ -10,15 +10,37 @@ import VectorTileLayer from 'ol/layer/VectorTile';
 
 import VectorTileSource from 'ol/source/VectorTile';
 import MVT from 'ol/format/MVT';
-import { getBoundaryStyle, hoverStyle } from './map-styles';
+import { getBoundaryStyle, hoverStyle, selectedStyle } from './map-styles';
+import { createPortal } from 'react-dom';
 import { useGlobalState } from '~/lib/global-state';
+import type { FeatureLike } from 'ol/Feature';
+
+const HoverPopover = ({ feature }: { feature: FeatureLike | null }) => {
+  if (!feature) {
+    return <></>;
+  }
+  return (
+    <div className="grid grid-cols-[auto_auto] gap-y-1 gap-x-8">
+      <span className="font-bold text-sm">Name</span>
+      <p className="font-bold text-sm">{feature.getProperties().name}</p>
+      <p>Code</p>
+      <p>{feature.getProperties().code}</p>
+      <p>Area</p>
+      <p>{feature.getProperties().area} (km)</p>
+    </div>
+  );
+};
 
 const MapView = () => {
   const mapInstance = useRef<Map | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const boundariesLayerRef = useRef<VectorTileLayer | null>(null);
   const [, setMapLoaded] = useState(false);
-  const { currentBoundary } = useGlobalState();
+  const { selectedFeature } = useGlobalState();
+  const { hoverSelection, handleZoomIn, handleZoomOut } = useInteractiveMap(
+    mapInstance.current
+  );
 
   // Create map and base layer
   useEffect(() => {
@@ -70,9 +92,12 @@ const MapView = () => {
     };
   }, []);
 
-  const { hoverSelection, handleZoomIn, handleZoomOut } = useInteractiveMap(
-    mapInstance.current
-  );
+  useEffect(() => {
+    createPortal(
+      <h1>Hello world</h1>,
+      document.getElementById('detail-popover')!
+    );
+  }, [mapRef]);
 
   useEffect(() => {
     if (!mapInstance.current || !boundariesLayerRef.current) {
@@ -80,21 +105,30 @@ const MapView = () => {
     }
     boundariesLayerRef.current.setStyle(
       getBoundaryStyle(mapInstance.current, (feature) => {
-        if (feature.get('code') === hoverSelection) {
+        if (feature.get('code') === hoverSelection?.get('code')) {
           return hoverStyle;
+        }
+        if (feature.get('code') === selectedFeature?.get('code')) {
+          return selectedStyle;
         }
       })
     );
     boundariesLayerRef.current.changed();
-  }, [hoverSelection]);
+  }, [hoverSelection, selectedFeature]);
 
   return (
     <div className="relative w-full h-full">
       <div ref={mapRef} id="map" className="w-full h-full"></div>
       <div
         id="detail-popover"
-        className="absolute pointer-events-none dark:bg-white dark:text-gray-900 p-4 rounded-sm text-xs w-40 -translate-x-[10%] -translate-y-[120%]"
+        ref={popoverRef}
+        className="absolute top-0 left-0 card-background pointer-events-none text-xs translate-x-[5%] -translate-y-[100%] bg-opacity-100 shadow-2xl"
       />
+      {popoverRef.current &&
+        createPortal(
+          <HoverPopover feature={hoverSelection} />,
+          popoverRef.current
+        )}
 
       {/* Custom Controls */}
       <div className="absolute top-4 left-4 z-10 flex gap-2">

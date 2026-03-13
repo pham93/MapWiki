@@ -17,6 +17,8 @@ import { Sidebar } from '~/components/ui/sidebar';
 import type { Route } from './+types/root';
 import './app.css';
 import { DetailDrawer } from './components/ui/detail-drawer';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ImagePreview } from './wikidata/image-preview';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -49,22 +51,27 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 }
 
+const queryClient = new QueryClient();
+
 export default function App() {
   const [vectorOpacity, setVectorOpacity] = useState(0.7);
+
   return (
     <EnvironmentProvider>
-      <GlobalStateProvider>
-        <ThemeProvider defaultTheme="system" storageKey="map-visual-ui-theme">
-          <LayerProvider
-            vectorOpacity={vectorOpacity}
-            setVectorOpacity={setVectorOpacity}
-          >
-            <Sidebar />
-            <DetailDrawer />
-            <Outlet />
-          </LayerProvider>
-        </ThemeProvider>
-      </GlobalStateProvider>
+      <QueryClientProvider client={queryClient}>
+        <GlobalStateProvider>
+          <ThemeProvider defaultTheme="system" storageKey="map-visual-ui-theme">
+            <LayerProvider
+              vectorOpacity={vectorOpacity}
+              setVectorOpacity={setVectorOpacity}
+            >
+              <Sidebar />
+              <DetailDrawer />
+              <Outlet />
+            </LayerProvider>
+          </ThemeProvider>
+        </GlobalStateProvider>
+      </QueryClientProvider>
     </EnvironmentProvider>
   );
 }

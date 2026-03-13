@@ -16,6 +16,10 @@ body {
   @apply w-full h-screen min-h-[400px];
 }
 
+.card-background {
+  @apply backdrop-filter backdrop-blur-2xl  bg-clip-padding rounded-sm border-1 p-4 pr-10 whitespace-nowrap min-w-16;
+}
+
 /* GPU Acceleration for Map Performance */
 #map {
   transform: translateZ(0); /* Force hardware acceleration */

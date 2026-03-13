@@ -11,6 +11,14 @@ export const hoverStyle = new Style({
   fill: new Fill({ color: 'rgba(134, 159, 254, 0.1)' }),
 });
 
+export const selectedStyle = new Style({
+  stroke: new Stroke({
+    color: 'green',
+    width: 3,
+  }),
+  fill: new Fill({ color: 'rgba(134, 159, 254, 0.1)' }),
+});
+
 export const getBoundaryStyle = (
   map: Map,
   callback?: (f: FeatureLike) => Style | undefined
